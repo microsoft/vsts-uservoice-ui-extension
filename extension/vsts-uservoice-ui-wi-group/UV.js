@@ -1,4 +1,4 @@
-define(["require", "exports", "q", "vsts-extension-uviz-settings-hub/settings"], function (require, exports, Q, Settings) {
+define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, Q, Settings) {
     var UserVoiceSuggestion = (function () {
         function UserVoiceSuggestion(id, title, url, votes, status) {
             this.id = id;

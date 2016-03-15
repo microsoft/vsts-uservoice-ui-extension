@@ -1,5 +1,5 @@
-define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-extension-uviz-wi-group/UV", "vsts-extension-uviz-settings-hub/settings"], function (require, exports, WitServices, UV, Settings) {
-    VSS.register("vsts-extension-uviz-wi-group", function () {
+define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-ui-wi-group/UV", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, WitServices, UV, Settings) {
+    VSS.register("vsts-uservoice-ui-wi-group", function () {
         return {
             onLoaded: function (args) {
                 render();

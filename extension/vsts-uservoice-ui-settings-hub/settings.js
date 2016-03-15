@@ -26,7 +26,7 @@ define(["require", "exports", "q"], function (require, exports, Q) {
             this._populate();
         };
         Settings.prototype.urlToConfigureSettings = function () {
-            return VSS.getWebContext().collection.uri + "_admin/_apps/hub/ewald.vsts-extension-uviz.vsts-extension-uviz-settings-hub?hubGroupId=ms.vss-web.collection-admin-hub-group";
+            return VSS.getWebContext().collection.uri + "_admin/_apps/hub/ms-devlabs.vsts-uservoice-ui.vsts-uservoice-ui-settings-hub";
         };
         Settings.prototype.getSettings = function (rejectOnSettingNotAvailable) {
             var _this = this;
