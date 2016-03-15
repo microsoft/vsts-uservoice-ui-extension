@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1.0,
     "id": "vsts-uservoice-ui",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "name": "User Voice UI",
     "description": "Shows the rich data of the linked User Voice suggestions on the work item form",
     "longDescription": "With User Voice you can turn customer engagement and feedback from thousands, or even millions, of users into smart product decisions - all without turning your backlog into a hurricane. With this extension you will be able to show rich data (state, votes) of the linked user voice items on your work item form to seamlessly connect your community with your engineering team.",

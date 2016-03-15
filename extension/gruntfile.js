@@ -56,7 +56,7 @@
     grunt.loadNpmTasks('grunt-ftp-deploy');
 
     grunt.registerTask("build", ["ts:build", "copy:scripts"]);
-    grunt.registerTask("package", ["build", "exec:package"]);
+    grunt.registerTask("package", ["clean", "build", "exec:package"]);
     grunt.registerTask("publish", ["default", "exec:publish"]);        
     grunt.registerTask("deploy", ["publish", "ftp-deploy"]);
     

@@ -8,6 +8,6 @@ In our backlogs, we add links to our Feature work items to these user voice item
 
 As we will add more contribution points in the future that user voice data will show up on more experiences, like on the cards on the Kanban board and the results of the query.
 
-You can find the source code of this extenion in [a GitHub repository](https://github.com/Microsoft/vsts-uservoice-ui-extension).
+You can find the source code of this extension in [a GitHub repository](https://github.com/Microsoft/vsts-uservoice-ui-extension).
 
 Ewald Hofman
