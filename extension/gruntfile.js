@@ -42,7 +42,7 @@
                 },
                 src: '.',
                 dest: 'site/wwwroot',
-                exclusions: ['img', 'node_modules', "typings", ".ftppass", ".gitignore", "*.vsix", "*.md", "*.json", "gruntfile.js"]
+                exclusions: ['img', 'node_modules', "typings", ".ftppass", ".gitignore", "*.vsix", "*.md", "*.json", "gruntfile.js", "*.ts"]
             }
         },
         
@@ -58,7 +58,7 @@
     grunt.registerTask("build", ["ts:build", "copy:scripts"]);
     grunt.registerTask("package", ["clean", "build", "exec:package"]);
     grunt.registerTask("publish", ["default", "exec:publish"]);        
-    grunt.registerTask("deploy", ["publish", "ftp-deploy"]);
+    grunt.registerTask("deploy", ["ftp-deploy"]);
     
     grunt.registerTask("default", ["package"]);
 };

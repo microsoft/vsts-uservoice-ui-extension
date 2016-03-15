@@ -42,6 +42,11 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
         });
     }
     function formatNumber(value) {
-        return value.toFixed(0).replace(/(\d)(?=(\d{3}))/g, '$1,');
+        var stringValue = value.toFixed(0);
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(stringValue)) {
+            stringValue = stringValue.replace(rgx, '$1' + ',' + '$2');
+        }
+        return stringValue;
     }
 });

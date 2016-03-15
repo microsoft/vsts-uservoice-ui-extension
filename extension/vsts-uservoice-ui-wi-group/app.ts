@@ -78,5 +78,10 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
     }
     
     function formatNumber(value: number): string {
-        return value.toFixed(0).replace(/(\d)(?=(\d{3}))/g, '$1,');
-    }
+        var stringValue = value.toFixed(0);
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(stringValue)) {
+            stringValue = stringValue.replace(rgx, '$1' + ',' + '$2');
+        }
+        return stringValue;
+    }    
