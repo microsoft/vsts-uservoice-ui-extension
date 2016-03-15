@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../scripts/VSS.SDK.js"></script>
+    <style>
+        #vss-extension {
+            padding: 10px 0 0 20px;
+        }
+        .input-container {
+            padding: 20px 0 0 0;
+        }
+        .label {
+            display: block;
+            margin: 5px 0;
+        }
+        input {
+            padding: 10px;
+            width: 410px;
+            border: 1px solid #e6e6e6;
+            padding: 3px;
+            line-height: 16px;
+            color: #1e1e1e;
+        }
+        #save-button {
+            display: block;
+            margin: 20px 0 0 0;
+        }
+        #save-result {
+            display: block;
+            margin: 20px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        // Initialize the VSS SDK
+        VSS.init({
+            usePlatformScripts: true
+        });
+
+        // Wait for the SDK to be initialized
+        VSS.ready(function () {
+            require(["vsts-uservoice-ui-settings-hub/settings"], function (s) { 
+                var settings = new s.Settings();
+                settings.initializeUI();
+            });
+            VSS.notifyLoadSucceeded();
+        });
+
+    </script>
+    <div id="vss-extension">
+        <div class="input-container">
+            <span class="label">
+                <label>Account name</label>
+            </span>
+            <input id="account-name" type="text" disabled="disabled" />
+        </div>
+
+        <div class="input-container">
+            <span class="label">
+                <label>API key from User Voice</label>
+            </span>
+            <input id="api-key" type="text" disabled="disabled" />
+        </div>
+
+        <br />
+        <button id="save-button" disabled="disabled" >Save Settings</button>
+
+        <span id="save-result">
+            Retrieving settings...
+        </span>
+    </div>
+</body>
+</html>

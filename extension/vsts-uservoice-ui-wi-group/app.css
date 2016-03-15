@@ -1,0 +1,37 @@
+.suggestion {
+    border-bottom: 7px solid transparent;
+}
+
+.votes-status {
+    float: left;
+    width: 70px;
+}
+
+.votes {
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgb(207, 215, 230);
+    border-radius: 3px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #292C33;
+    padding: 4px 10px;
+}
+
+.status {
+    color: white;
+    text-align: center;
+    padding: 3px 0;
+    border-radius: 3px;
+}
+
+.title {
+    padding-left: 10px;
+    width: 100%;
+    vertical-align: top;
+}
+
+.no-linked-suggestions {
+    color: #999;
+    display: block;
+}

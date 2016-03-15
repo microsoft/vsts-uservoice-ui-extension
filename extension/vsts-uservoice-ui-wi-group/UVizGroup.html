@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link href="app.css" rel="stylesheet" type="text/css"></link>
+    <script src="../scripts/VSS.SDK.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        // Initialize the VSS SDK
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformScripts: true
+        });
+        
+        // Wait for the SDK to be initialized
+        VSS.ready(function() {
+            // include the app.js and uv.js files in the scripts folder
+            VSS.require(["vsts-uservoice-ui-wi-group/app", "vsts-uservoice-ui-wi-group/UV"], function () {
+                // once the including of the files is completed, then notify the framework
+                // it can load the extensions
+                VSS.notifyLoadSucceeded();
+            });
+        });
+    </script>
+
+    <div id="items"></div>
+
+</body>
+</html>

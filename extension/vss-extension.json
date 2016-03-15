@@ -1,0 +1,77 @@
+{
+    "manifestVersion": 1.0,
+    "id": "vsts-uservoice-ui",
+    "version": "1.0.1",
+    "name": "User Voice UI",
+    "description": "Shows the rich data of the linked User Voice suggestions on the work item form",
+    "longDescription": "With User Voice you can turn customer engagement and feedback from thousands, or even millions, of users into smart product decisions - all without turning your backlog into a hurricane. With this extension you will be able to show rich data (state, votes) of the linked user voice items on your work item form to seamlessly connect your community with your engineering team.",
+    "baseUri": "https://uviz.azurewebsites.net",
+    "publisher": "ms-devlabs",
+    "public": false,
+    "icons": {
+        "default": "img/logo.png"
+    },
+    "content": {
+        "details": {
+            "path": "details.md"
+        }
+    },
+    "tags": [
+        "customer",
+        "feedback"
+    ],
+    "categories": [
+        "Plan and track"
+    ],  
+    "links": {
+        "getstarted": {
+            "uri": "https://www.uservoice.com/for/visual-studio-online/"
+        },
+        "support": {
+            "uri": "mailto://ewald.hofman@microsoft.com?subject=Support requested for vsts-uservoice-ui"
+        },
+        "learn": {
+            "uri": "https://www.uservoice.com/tour/helpdesk/"
+        },
+        "pricing": {
+            "uri": "https://www.uservoice.com/plans/product-management/"
+        }
+    },
+    "branding": {
+        "color": "rgb(218, 118, 27)",
+        "theme": "dark"
+    },
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "scopes": ["vso.work", "vso.work_write"],
+    "contributions": [
+        {
+            "id": "vsts-uservoice-ui-wi-group",
+            "type": "ms.vss-work-web.work-item-form-group",
+            "description": "Shows User Voice details on the work item form",
+            "targets": [
+                "ms.vss-work-web.work-item-form"
+            ],
+            "properties": {
+                "name": "Customer feedback",
+                "uri": "vsts-uservoice-ui-wi-group/UVizGroup.html"
+            }
+        },
+        {
+            "id": "vsts-uservoice-ui-settings-hub",
+            "type": "ms.vss-web.hub",
+            "description": "Settings for the User Voice Visualization extension",
+            "targets": [
+                "ms.vss-web.collection-admin-hub-group"
+            ],
+            "properties": {
+                "name": "UserVoice UI settings",
+                "order": 100,
+                "uri": "vsts-uservoice-ui-settings-hub/settings.html"
+            }
+        }
+    ]
+}
