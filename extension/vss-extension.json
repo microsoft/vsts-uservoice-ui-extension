@@ -3,11 +3,11 @@
     "id": "vsts-uservoice-ui",
     "version": "1.0.3",
     "name": "User Voice UI",
-    "description": "Shows the rich data of the linked User Voice suggestions on the work item form",
+    "description": "Shows rich data of the linked User Voice suggestions on the work item form",
     "longDescription": "With User Voice you can turn customer engagement and feedback from thousands, or even millions, of users into smart product decisions - all without turning your backlog into a hurricane. With this extension you will be able to show rich data (state, votes) of the linked user voice items on your work item form to seamlessly connect your community with your engineering team.",
     "baseUri": "https://uviz.azurewebsites.net",
     "publisher": "ms-devlabs",
-    "public": false,
+    "public": true,
     "icons": {
         "default": "img/logo.png"
     },
@@ -46,7 +46,7 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
-    "scopes": ["vso.work", "vso.work_write"],
+    "scopes": ["vso.work"],
     "contributions": [
         {
             "id": "vsts-uservoice-ui-wi-group",
