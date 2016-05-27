@@ -42,7 +42,7 @@ export class Services {
             var userVoiceItems = relations
                 // extract the id from the url. when the url is not a valid uservoice url, then the id will be null  
                 .map((relation: WitContracts.WorkItemRelation): {id: string} => {
-                    var pattern = `http[s]*:\/\/${settings.accountName}.uservoice.com\/forums/.+/suggestions/([0-9]+)`;
+                    var pattern = `\/forums/[0-9]+.*/suggestions/([0-9]+)`;
                     var matches = relation.url.match(pattern);
                     if ( matches && matches.length > 1 ) {
                         return {id: matches[1]};

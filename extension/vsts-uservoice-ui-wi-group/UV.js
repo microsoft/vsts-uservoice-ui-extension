@@ -1,4 +1,5 @@
 define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, Q, Settings) {
+    "use strict";
     var UserVoiceSuggestion = (function () {
         function UserVoiceSuggestion(id, title, url, votes, status) {
             this.id = id;
@@ -8,7 +9,7 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
             this.status = status;
         }
         return UserVoiceSuggestion;
-    })();
+    }());
     exports.UserVoiceSuggestion = UserVoiceSuggestion;
     var Services = (function () {
         function Services(workItemFormService) {
@@ -26,7 +27,7 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                 .spread(function (settings, relations) {
                 var userVoiceItems = relations
                     .map(function (relation) {
-                    var pattern = "http[s]*://" + settings.accountName + ".uservoice.com/forums/.+/suggestions/([0-9]+)";
+                    var pattern = "/forums/[0-9]+.*/suggestions/([0-9]+)";
                     var matches = relation.url.match(pattern);
                     if (matches && matches.length > 1) {
                         return { id: matches[1] };
@@ -73,6 +74,6 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
             return defer.promise;
         };
         return Services;
-    })();
+    }());
     exports.Services = Services;
 });
