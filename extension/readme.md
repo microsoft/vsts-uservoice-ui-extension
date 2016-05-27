@@ -17,8 +17,11 @@ vss-extension.json  - Extension manifest
 
 1. Clone the repository
 2. Install node.js
-1. `npm install` to install required dependencies
-2. `grunt` to build and package the application
+3. `npm install` to install required dependencies
+4. 'npm install -g grunt' to install grunt
+5. 'npm install -g tfx-cli'
+5. create ".ftppass" file if grunt needs to deploy the app using FTP (https://github.com/zonak/grunt-ftp-deploy)
+6. `grunt` to build and package the application
 
 #### Grunt ####
 
