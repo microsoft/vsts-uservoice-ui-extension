@@ -6,7 +6,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 render();
             },
             onSaved: function (args) {
-                addTag();
                 render();
             },
             onReset: function (args) {
@@ -14,6 +13,11 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
             },
             onRefreshed: function (args) {
                 render();
+            },
+            onFieldChanged: function (args) {
+                if (args.changedFields["System.LinkedFiles"] === "") {
+                    addTag();
+                }
             }
         };
     });
@@ -34,7 +38,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                                     wi.setFieldValue("System.Tags", tags.concat([settings.tag])
                                         .join(";"));
                                 }
-                                wi.beginSaveWorkItem(undefined, undefined);
                             });
                         }
                     });

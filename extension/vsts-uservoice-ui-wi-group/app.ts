@@ -14,7 +14,6 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
 
             // Called after the work item has been saved
             onSaved: function (args) {
-                addTag();
                 render();                
             },
 
@@ -26,6 +25,15 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
             // Called when the work item has been refreshed from the server
             onRefreshed: function (args) {
                 render();                
+            },
+
+            // Called when a field is changed on the work item
+            onFieldChanged: function (args) {
+                // When adding a link
+                if (args.changedFields["System.LinkedFiles"] === "") {
+                    // add the defined tag when one of the links is a user voice suggestion
+                    addTag();
+                }
             }
         }
     });
@@ -59,8 +67,6 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                                         tags.concat([settings.tag])
                                             .join(";"));
                                 }
-
-                                wi.beginSaveWorkItem(undefined, undefined);
                             });
                         }
                     })
