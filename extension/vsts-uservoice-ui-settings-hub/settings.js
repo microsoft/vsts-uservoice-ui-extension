@@ -1,20 +1,24 @@
 define(["require", "exports", "q"], function (require, exports, Q) {
+    "use strict";
     var UVizSettings = (function () {
-        function UVizSettings(accountName, apiKey) {
+        function UVizSettings(accountName, apiKey, tag) {
             this.accountName = accountName;
             this.apiKey = apiKey;
+            this.tag = tag;
         }
         return UVizSettings;
-    })();
+    }());
     exports.UVizSettings = UVizSettings;
     var Settings = (function () {
         function Settings() {
             this.scope = "Default";
             this.accountNameSetting = "accountname";
             this.apiKeySetting = "apikey";
+            this.tagSetting = "tag";
             this.unknownValue = "<unknown>";
             this.accountNameSelector = "#account-name";
             this.apiKeySelector = "#api-key";
+            this.tagSelector = "#tag";
             this.saveButtonSelector = "#save-button";
             this.saveResultSelector = "#save-result";
         }
@@ -35,13 +39,14 @@ define(["require", "exports", "q"], function (require, exports, Q) {
             VSS.getService(VSS.ServiceIds.ExtensionData).then(function (dataService) {
                 Q.all([
                     dataService.getValue(_this.accountNameSetting, { scopeType: _this.scope, defaultValue: _this.unknownValue }),
-                    dataService.getValue(_this.apiKeySetting, { scopeType: _this.scope, defaultValue: _this.unknownValue })
-                ]).spread(function (accountName, apiKey) {
+                    dataService.getValue(_this.apiKeySetting, { scopeType: _this.scope, defaultValue: _this.unknownValue }),
+                    dataService.getValue(_this.tagSetting, { scopeType: _this.scope, defaultValue: "" })
+                ]).spread(function (accountName, apiKey, tag) {
                     if (rejectOnSettingNotAvailable && (accountName === _this.unknownValue || apiKey === _this.unknownValue)) {
                         defer.reject("You need to <a target=\"_blank\" href=\"" + _this.urlToConfigureSettings() + "\">configure this extension</a> before you can use it.");
                     }
                     else {
-                        defer.resolve(new UVizSettings(resetUnknownValue(accountName), resetUnknownValue(apiKey)));
+                        defer.resolve(new UVizSettings(resetUnknownValue(accountName), resetUnknownValue(apiKey), tag));
                     }
                 }).fail(function (reason) {
                     defer.reject(reason);
@@ -54,9 +59,11 @@ define(["require", "exports", "q"], function (require, exports, Q) {
             $(this.saveResultSelector).text("Saving settings...");
             var accountName = $(this.accountNameSelector).val();
             var apiKey = $(this.apiKeySelector).val();
+            var tag = $(this.tagSelector).val();
             VSS.getService(VSS.ServiceIds.ExtensionData).then(function (dataService) {
                 dataService.setValue(_this.accountNameSetting, accountName, { scopeType: _this.scope }).then(function (value) { });
                 dataService.setValue(_this.apiKeySetting, apiKey, { scopeType: _this.scope }).then(function (value) { });
+                dataService.setValue(_this.tagSetting, tag, { scopeType: _this.scope }).then(function (value) { });
                 $(_this.saveResultSelector).text("The settings are saved.");
                 setTimeout(function () { $(_this.saveResultSelector).text(""); }, 2000);
             });
@@ -66,11 +73,12 @@ define(["require", "exports", "q"], function (require, exports, Q) {
             this.getSettings(false).done(function (settings) {
                 $(_this.accountNameSelector).val(settings.accountName).prop("disabled", false);
                 $(_this.apiKeySelector).val(settings.apiKey).prop("disabled", false);
+                $(_this.tagSelector).val(settings.tag).prop("disabled", false);
                 $(_this.saveResultSelector).text("");
                 $(_this.saveButtonSelector).prop("disabled", false);
             });
         };
         return Settings;
-    })();
+    }());
     exports.Settings = Settings;
 });

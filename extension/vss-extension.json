@@ -46,7 +46,7 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
-    "scopes": ["vso.work"],
+    "scopes": ["vso.work", "vso.work_write"],
     "contributions": [
         {
             "id": "vsts-uservoice-ui-wi-group",

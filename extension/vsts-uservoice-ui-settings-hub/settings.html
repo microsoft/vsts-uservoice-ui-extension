@@ -51,16 +51,23 @@
     <div id="vss-extension">
         <div class="input-container">
             <span class="label">
-                <label>Account name</label>
+                <label>Account name (without .uservoice.com, e.g. if you url is foo.uservoice.com enter "foo" below)</label>
             </span>
             <input id="account-name" type="text" disabled="disabled" />
         </div>
 
         <div class="input-container">
             <span class="label">
-                <label>API key from User Voice</label>
+                <label>API key from User Voice (you can find the key in the User Voice Admin site)</label>
             </span>
             <input id="api-key" type="text" disabled="disabled" />
+        </div>
+
+        <div class="input-container">
+            <span class="label">
+                <label>Which tag do you want to apply to the work item when a link to user voice is added? (leave blank if you don't want to auto apply tags)</label>
+            </span>
+            <input id="tag" type="text" disabled="disabled" />
         </div>
 
         <br />

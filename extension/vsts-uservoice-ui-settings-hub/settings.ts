@@ -7,7 +7,8 @@ export class UVizSettings {
     
     constructor(
         public accountName: string, 
-        public apiKey: string
+        public apiKey: string,
+        public tag: string
     ) { }
 
 }
@@ -17,9 +18,11 @@ export class Settings {
     private scope = "Default"; // can either be User or Default 
     private accountNameSetting = "accountname";
     private apiKeySetting = "apikey";
+    private tagSetting = "tag";
     private unknownValue = "<unknown>";
     private accountNameSelector = "#account-name";
     private apiKeySelector = "#api-key";
+    private tagSelector = "#tag";
     private saveButtonSelector = "#save-button";
     private saveResultSelector = "#save-result";
     
@@ -57,8 +60,9 @@ export class Settings {
             // get the value of both settings, and when the value for the setting isn't set yet, then return the default value which is <unknown> 
             Q.all([
                 dataService.getValue<string>(this.accountNameSetting, {scopeType: this.scope, defaultValue: this.unknownValue}),
-                dataService.getValue<string>(this.apiKeySetting, {scopeType: this.scope, defaultValue: this.unknownValue})
-            ]).spread((accountName: string, apiKey: string) => {
+                dataService.getValue<string>(this.apiKeySetting, {scopeType: this.scope, defaultValue: this.unknownValue}),
+                dataService.getValue<string>(this.tagSetting, {scopeType: this.scope, defaultValue: ""})
+            ]).spread((accountName: string, apiKey: string, tag: string) => {
                 
                 // when the caller wants to reject the promise when the setting is not configured yet (which is the contribution on the work item form)
                 if (rejectOnSettingNotAvailable && (accountName === this.unknownValue || apiKey === this.unknownValue)) {
@@ -70,7 +74,7 @@ export class Settings {
                     
                     // if either the caller wants to get settings even when it doesn't exist yet (which is the admin page to configure the 
                     // settings), or when the settings are successfully retrieved, resolve the promise
-                    defer.resolve(new UVizSettings(resetUnknownValue(accountName), resetUnknownValue(apiKey)));
+                    defer.resolve(new UVizSettings(resetUnknownValue(accountName), resetUnknownValue(apiKey), tag));
                 }
             }).fail((reason: any): void => {
                 defer.reject(reason);
@@ -91,11 +95,13 @@ export class Settings {
         // get the value of the input controls
         const accountName = $(this.accountNameSelector).val();
         const apiKey = $(this.apiKeySelector).val();
+        const tag = $(this.tagSelector).val();
         
         // store the values
         VSS.getService(VSS.ServiceIds.ExtensionData).then((dataService: Extension_Data.ExtensionDataService) => {  
             dataService.setValue(this.accountNameSetting, accountName, {scopeType: this.scope}).then((value: string) => {});
             dataService.setValue(this.apiKeySetting, apiKey, {scopeType: this.scope}).then((value: string) => {});
+            dataService.setValue(this.tagSetting, tag, {scopeType: this.scope}).then((value: string) => {});
             
             $(this.saveResultSelector).text("The settings are saved.");
             setTimeout(() => {$(this.saveResultSelector).text(""); }, 2000);
@@ -113,6 +119,7 @@ export class Settings {
             // ... then set the values and enable the inputs ... 
             $(this.accountNameSelector).val(settings.accountName).prop("disabled", false);
             $(this.apiKeySelector).val(settings.apiKey).prop("disabled", false);
+            $(this.tagSelector).val(settings.tag).prop("disabled", false);
             
             // ... and enable the save button
             $(this.saveResultSelector).text("");

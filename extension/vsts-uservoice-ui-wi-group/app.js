@@ -1,10 +1,12 @@
 define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-ui-wi-group/UV", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, WitServices, UV, Settings) {
+    "use strict";
     VSS.register("vsts-uservoice-ui-wi-group", function () {
         return {
             onLoaded: function (args) {
                 render();
             },
             onSaved: function (args) {
+                addTag();
                 render();
             },
             onReset: function (args) {
@@ -15,6 +17,31 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
             }
         };
     });
+    function addTag() {
+        var settings = new Settings.Settings();
+        WitServices.WorkItemFormService.getService().then(function (wi) {
+            var UVServices = new UV.Services(wi);
+            UVServices.linkedUVSuggestions().then(function (linkedUVSuggestions) {
+                if (linkedUVSuggestions.length > 0) {
+                    settings.getSettings(false).done(function (settings) {
+                        if (settings.tag) {
+                            wi.getFieldValue("System.Tags").then(function (tagString) {
+                                var tags = tagString
+                                    .split(";")
+                                    .map(function (t) { return t.trim(); })
+                                    .filter(function (t) { return !!t; });
+                                if (tags.indexOf(settings.tag) === -1) {
+                                    wi.setFieldValue("System.Tags", tags.concat([settings.tag])
+                                        .join(";"));
+                                }
+                                wi.beginSaveWorkItem(undefined, undefined);
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    }
     function render() {
         WitServices.WorkItemFormService.getService().then(function (service) {
             var UVServices = new UV.Services(service);

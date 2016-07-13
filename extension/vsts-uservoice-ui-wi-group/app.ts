@@ -14,6 +14,7 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
 
             // Called after the work item has been saved
             onSaved: function (args) {
+                addTag();
                 render();                
             },
 
@@ -28,7 +29,46 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
             }
         }
     });
-    
+
+    /**
+     * Adds the tag as specified in the settings to the current work item. If no tag is configured, nothing happens. 
+     */
+    function addTag() {
+        var settings = new Settings.Settings();
+
+        WitServices.WorkItemFormService.getService().then(wi => {
+            var UVServices = new UV.Services(wi);
+            UVServices.linkedUVSuggestions().then(linkedUVSuggestions => {
+                // when there are linked user voice suggestions
+                if (linkedUVSuggestions.length > 0) {
+                    settings.getSettings(false).done((settings: Settings.UVizSettings) => { 
+                        // when the tag is specified in the settings
+                        if (settings.tag) {
+                            // get the current value of the tags which gives back the list of tags in a ;-separated string
+                            (<IPromise<string>>wi.getFieldValue("System.Tags")).then(tagString => {
+                                // convert the string into an array
+                                let tags = tagString
+                                    .split(";")
+                                    .map(t => t.trim())
+                                    .filter(t => !!t);
+                                
+                                // add the tag as specified in the settings to the array when it doesn't exist yet and convert it into a ;-separated list again
+                                // and finally add the tags to the work item
+                                if (tags.indexOf(settings.tag) === -1) {                                    
+                                    wi.setFieldValue("System.Tags", 
+                                        tags.concat([settings.tag])
+                                            .join(";"));
+                                }
+
+                                wi.beginSaveWorkItem(undefined, undefined);
+                            });
+                        }
+                    })
+                }        
+            })
+        })        
+    }
+
     function render() {
         WitServices.WorkItemFormService.getService().then(service => {
 
