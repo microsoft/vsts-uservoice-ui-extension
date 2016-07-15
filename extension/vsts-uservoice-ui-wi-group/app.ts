@@ -9,22 +9,22 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
         return {
             // Called when a new work item is being loaded in the UI
             onLoaded: function (args) {
-                render();                
+                render();
             },
 
             // Called after the work item has been saved
             onSaved: function (args) {
-                render();                
+                render();
             },
 
             // Called when the work item is reset to its unmodified state (undo)
             onReset: function (args) {
-                render();                
+                render();
             },
 
             // Called when the work item has been refreshed from the server
             onRefreshed: function (args) {
-                render();                
+                render();
             },
 
             // Called when a field is changed on the work item
@@ -33,6 +33,7 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                 if (args.changedFields["System.LinkedFiles"] === "") {
                     // add the defined tag when one of the links is a user voice suggestion
                     addTag();
+                    render();
                 }
             }
         }
@@ -104,7 +105,15 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                     if (linkedUVSuggestions.length === 0) {
                         var settings = new Settings.Settings();
                         settings.getSettings(true).then((settings: Settings.UVizSettings) => {
-                            $("#items").empty().append($(`<span class="no-linked-suggestions" />`).html(`No suggestions linked to this work item. Find some in <a target="_blank" href="http://${settings.accountName}.uservoice.com">your User Voice forum</a>`));
+                            $("#items").empty().append($(`
+                            <span class="no-linked-suggestions" />`).html(`
+                                <p>
+                                    No suggestions linked to this work item. Find some in <a target="_blank" href="http://${settings.accountName}.uservoice.com">your User Voice forum</a>. 
+                                </p><p>
+                                    Once you found a suggestion, add the User Voice URL as an "Hyperlink" to this work item. 
+                                </p><p>
+                                    See also this <a href="addlink.gif" target="_blank">instruction video</a>.
+                                </p>`));
                         });
                     }
                     

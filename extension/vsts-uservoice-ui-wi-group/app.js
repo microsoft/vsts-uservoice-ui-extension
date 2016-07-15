@@ -17,6 +17,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
             onFieldChanged: function (args) {
                 if (args.changedFields["System.LinkedFiles"] === "") {
                     addTag();
+                    render();
                 }
             }
         };
@@ -58,7 +59,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 if (linkedUVSuggestions.length === 0) {
                     var settings = new Settings.Settings();
                     settings.getSettings(true).then(function (settings) {
-                        $("#items").empty().append($("<span class=\"no-linked-suggestions\" />").html("No suggestions linked to this work item. Find some in <a target=\"_blank\" href=\"http://" + settings.accountName + ".uservoice.com\">your User Voice forum</a>"));
+                        $("#items").empty().append($("\n                            <span class=\"no-linked-suggestions\" />").html("\n                                <p>\n                                    No suggestions linked to this work item. Find some in <a target=\"_blank\" href=\"http://" + settings.accountName + ".uservoice.com\">your User Voice forum</a>. \n                                </p><p>\n                                    Once you found a suggestion, add the User Voice URL as an \"Hyperlink\" to this work item. \n                                </p><p>\n                                    See also this <a href=\"addlink.gif\" target=\"_blank\">instruction video</a>.\n                                </p>"));
                     });
                 }
                 if (linkedUVSuggestions.length > 2) {
