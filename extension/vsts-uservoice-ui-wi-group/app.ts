@@ -92,13 +92,41 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
 
                     // show the 2 user voice items with the most votes
                     $.each(linkedUVSuggestions.slice(0, 2), (idx: number, UVSuggestion: UV.UserVoiceSuggestion) => {
-                        $("#items table").append($(`<tr class="suggestion"/>`).html(
-                            `<td class="votes-status">
-                                <div class="votes">${formatNumber(UVSuggestion.votes)}</div>
-                                <div class="status" style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}">${UVSuggestion.status.name || "no state"}</div>
-                            </td>
-                            <td class="title"><a target="_blank" href="${UVSuggestion.url}">${UVSuggestion.title}</a></td>
-                            `));
+                        $("#items table").append(
+                            $(`<tr class="suggestion"/>`).html(
+                                `<td class="votes-status">
+                                    <div class="votes">${formatNumber(UVSuggestion.votes)}</div>
+                                    <div class="status" style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}">${UVSuggestion.status.name || "no state"}</div>
+                                    <div class="status-response tooltip">
+                                        <span class="status-response-date">${UVSuggestion.response_date}</span>
+                                        <span>${UVSuggestion.response}</span>
+                                    </div>
+                                </td>
+                                <td class="title-cell">
+                                    <a class="title" target="_blank" href="${UVSuggestion.url}">${UVSuggestion.title}</a>
+                                    <div class="suggestion-description tooltip">
+                                        <span>${UVSuggestion.description}</span>
+                                    </div>
+                                    ${UVSuggestion.total_comments === 0
+                                        ? "" 
+                                        : ` <div class="comments">
+                                                <span class="bowtie-icon bowtie-comment-discussion"></span>
+                                                <div class="commentcount">
+                                                    <span>${UVSuggestion.total_comments}</span>
+                                                    ${UVSuggestion.most_recent_comments && UVSuggestion.most_recent_comments.length > 0 
+                                                        ? `(<span class="most-recent-comment">${UVSuggestion.most_recent_comments[0].created_at}</span>)
+                                                </div>
+                                                <div id="comments_${UVSuggestion.id}" class="comments-tooltip tooltip">
+                                                    Newest comment by <span class="comment-created-by">${UVSuggestion.most_recent_comments[0].created_by}</span> <span>(${UVSuggestion.most_recent_comments[0].created_at})</span>
+                                                    <span>${UVSuggestion.most_recent_comments[0].html}</span>
+                                                </div>
+                                                    ` 
+                                                    : ""}
+                                            </div>`
+                                    }
+                                </td>`
+                            )
+                        );
                     });
 
                     // when there are no items linked provide a help text

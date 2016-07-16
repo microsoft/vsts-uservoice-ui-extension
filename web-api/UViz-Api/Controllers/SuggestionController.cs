@@ -1,51 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Script.Serialization;
 using UViz_Api.Models;
+using UVApi = UViz_Api.Models.UVApi;
 
 namespace UViz_Api.Controllers
 {
-    public class ResponseJSON
-    {
-        public SuggestionJSON suggestion { get; set; }
-    }
-
-    public class SuggestionJSON
-    {
-        public string created_at { get; set; }
-        public int comments_count { get; set; }
-        public string formatted_text { get; set; }
-        public int id { get; set; }
-        public SuggestionResponseJSON response { get; set; }
-        public SuggestionStatusJSON status { get; set; }
-        public string text { get; set; }
-        public string title { get; set; }
-        public string url { get; set; }
-        public int vote_count { get; set; }
-    }
-
-    public class SuggestionResponseJSON
-    {
-        public string created_at { get; set; }
-        public string formatted_text { get; set; }
-        public string text { get; set; }
-    }
-
-    public class SuggestionStatusJSON
-    {
-        public string hex_color { get; set; }
-        public string name { get; set; }
-    }
-
     public class SuggestionController : ApiController
     {
 
-        public async Task<UVSuggestion> getItem(int id, string accountName, string apikey)
+        public async Task<Suggestion> getItem(int id, string accountName, string apikey)
         {
             var url = $"https://{accountName}.uservoice.com/api/v1/suggestions/{id}.json?client={apikey}";
 
@@ -56,31 +25,36 @@ namespace UViz_Api.Controllers
                 {
 
                     var json = await response.Content.ReadAsStringAsync();
-                    var jsonObject = new JavaScriptSerializer().Deserialize<ResponseJSON>(json);
+                    var jsonObject = new JavaScriptSerializer().Deserialize<UVApi.RawSuggestionResponse>(json);
 
-                    return new UVSuggestion()
+                    return new Suggestion()
                     {
                         id = id,
                         title = jsonObject.suggestion.title,
+                        description = jsonObject.suggestion.formatted_text,
                         url = jsonObject.suggestion.url,
                         votes = jsonObject.suggestion.vote_count,
-                        status = new UVStatus()
+                        status = new Status()
                         {
                             name = jsonObject.suggestion.status?.name,
                             hex_color = jsonObject.suggestion.status?.hex_color
-                        }
+                        },
+                        response = jsonObject.suggestion.response.formatted_text,
+                        response_date = FormatDate(jsonObject.suggestion.response.created_at),
+                        total_comments = jsonObject.suggestion.comments_count,
+                        most_recent_comments = await getCommentsOfItem(jsonObject.suggestion.topic.forum.id, id, accountName, apikey)
                     };
 
                 }
                 else
                 {
 
-                    return new UVSuggestion()
+                    return new Suggestion()
                     {
                         id = id,
                         title = response.ReasonPhrase,
                         votes = 0,
-                        status = new UVStatus()
+                        status = new Status()
                         {
                             name = "Error",
                             hex_color = "#CC293D"
@@ -90,6 +64,43 @@ namespace UViz_Api.Controllers
                 }
 
             }
+        }
+
+        private async Task<IEnumerable<Comment>> getCommentsOfItem(int forumId, int id, string accountName, string apikey)
+        {
+            var url = $"https://{accountName}.uservoice.com/api/v1/forums/{forumId}/suggestions/{id}/comments.json?client={apikey}";
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    var jsonObject = new JavaScriptSerializer().Deserialize<UVApi.RawCommentResponse>(json);
+
+                    return from c in jsonObject.comments
+                           select new Comment()
+                           {
+                               html = c.formatted_text,
+                               created_at = FormatDate(c.created_at),
+                               created_by = c.creator.name
+                           };
+                }
+
+                else
+                {
+
+                    return null;
+
+                }
+
+            }
+        }
+
+        private static string FormatDate(string dateString)
+        {
+            return DateTime.ParseExact(dateString, "yyyy/MM/dd HH:mm:ss +0000", CultureInfo.InvariantCulture).ToString("MMM dd, yyyy");
         }
 
     }

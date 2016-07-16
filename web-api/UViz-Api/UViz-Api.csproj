@@ -92,8 +92,19 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\UVStatus.cs" />
-    <Compile Include="Models\UVSuggestion.cs" />
+    <Compile Include="Models\Comment.cs" />
+    <Compile Include="Models\UVApi\Comment.cs" />
+    <Compile Include="Models\UVApi\Creator.cs" />
+    <Compile Include="Models\UVApi\Forum.cs" />
+    <Compile Include="Models\UVApi\RawCommentResponse.cs" />
+    <Compile Include="Models\UVApi\RawSuggestionResponse.cs" />
+    <Compile Include="Models\UVApi\ResponseData.cs" />
+    <Compile Include="Models\UVApi\SuggestionTopic.cs" />
+    <Compile Include="Models\UVApi\Suggestion.cs" />
+    <Compile Include="Models\UVApi\SuggestionResponse.cs" />
+    <Compile Include="Models\UVApi\SuggestionStatus.cs" />
+    <Compile Include="Models\Status.cs" />
+    <Compile Include="Models\Suggestion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

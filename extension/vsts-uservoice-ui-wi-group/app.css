@@ -25,13 +25,53 @@
     border-radius: 3px;
 }
 
-.title {
+.status:hover + .status-response {
+  display: block;
+}
+
+.status-response-date {
+    font-weight: bold;
+}
+
+.title-cell {
     padding-left: 10px;
     width: 100%;
     vertical-align: top;
 }
 
+.title:hover + .suggestion-description {
+  display: block;
+}
+
 .no-linked-suggestions {
     color: #999;
     display: block;
+}
+
+.comments {
+    margin-top: 10px;
+}
+
+.commentcount {
+    margin-left: 5px;
+    display: inline;
+}
+
+.comments:hover > .comments-tooltip {
+  display: block;
+}
+
+.comment-created-by {
+    font-weight: bold;
+    margin-right: 2px;
+}
+
+.tooltip {
+  border: 1px solid grey;
+  background: #fafafa;
+  display: none;
+  padding: 0 5px;
+  margin-left: 10px;
+  width: 350px;
+  position: absolute;
 }

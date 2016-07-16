@@ -11,12 +11,27 @@ export class UserVoiceSuggestion {
     public constructor(
         public id: number,
         public title: string,
+        public description: string,
         public url: string,
         public votes: number,
         public status: {
             name: string;
             hex_color: string;
-        }
+        },
+        public response: string,
+        public response_date: string,
+        public total_comments: number,
+        public most_recent_comments: UserVoiceComment[]
+    ) { }
+
+}
+
+export class UserVoiceComment {
+
+    public constructor(
+        public created_by: string,
+        public created_at: string,
+        public html: string
     ) { }
 
 }
@@ -91,12 +106,17 @@ export class Services {
                 defer.resolve(new UserVoiceSuggestion(
                     data.id, 
                     data.title, 
+                    data.description,
                     data.url,
                     data.votes, 
                     {
                         name: data.status.name, 
                         hex_color: data.status.hex_color
-                    })
+                    },
+                    data.response,
+                    data.response_date,
+                    data.total_comments,
+                    data.most_recent_comments)
                 );
             } else {
                 // something went wrong, and inform the user

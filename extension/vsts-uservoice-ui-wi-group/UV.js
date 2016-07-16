@@ -1,16 +1,30 @@
 define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, Q, Settings) {
     "use strict";
     var UserVoiceSuggestion = (function () {
-        function UserVoiceSuggestion(id, title, url, votes, status) {
+        function UserVoiceSuggestion(id, title, description, url, votes, status, response, response_date, total_comments, most_recent_comments) {
             this.id = id;
             this.title = title;
+            this.description = description;
             this.url = url;
             this.votes = votes;
             this.status = status;
+            this.response = response;
+            this.response_date = response_date;
+            this.total_comments = total_comments;
+            this.most_recent_comments = most_recent_comments;
         }
         return UserVoiceSuggestion;
     }());
     exports.UserVoiceSuggestion = UserVoiceSuggestion;
+    var UserVoiceComment = (function () {
+        function UserVoiceComment(created_by, created_at, html) {
+            this.created_by = created_by;
+            this.created_at = created_at;
+            this.html = html;
+        }
+        return UserVoiceComment;
+    }());
+    exports.UserVoiceComment = UserVoiceComment;
     var Services = (function () {
         function Services(workItemFormService) {
             this.workItemFormService = workItemFormService;
@@ -60,10 +74,10 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                 url: "../api/Suggestion/" + id + "?accountName=" + accountName + "&apikey=" + apiKey
             }).done(function (data) {
                 if (data.id) {
-                    defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.url, data.votes, {
+                    defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.description, data.url, data.votes, {
                         name: data.status.name,
                         hex_color: data.status.hex_color
-                    }));
+                    }, data.response, data.response_date, data.total_comments, data.most_recent_comments));
                 }
                 else {
                     var settings = new Settings.Settings;
