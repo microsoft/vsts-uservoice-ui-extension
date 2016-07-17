@@ -1,6 +1,8 @@
 # Sample extension: User Voice UI
 This repo is a sample for how to add contributions to the work item form using the extensibility model of Visual Studio Team Services. You can find the result of this extension in the [VSTS marketplace](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-uservoice-ui). You can learn more about about the integration cababilities of VSTS in [our documentation](https://www.visualstudio.com/integrate/explore/explore-vso-vsi).
 
+ ![Customer Feedback group on work item form](https://github.com/Microsoft/vsts-uservoice-ui-extension/blob/master/readme.png)
+
 This sample shows a couple of concepts that can help you to understand better how to integrate with VSTS. The concepts that are showcased in this sample are the following:
 * Add a group to the work item form
 * Add configuration options to your extensions, including a page in the admin area
