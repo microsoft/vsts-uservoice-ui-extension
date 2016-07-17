@@ -39,8 +39,8 @@ namespace UViz_Api.Controllers
                             name = jsonObject.suggestion.status?.name,
                             hex_color = jsonObject.suggestion.status?.hex_color
                         },
-                        response = jsonObject.suggestion.response.formatted_text,
-                        response_date = FormatDate(jsonObject.suggestion.response.created_at),
+                        response = jsonObject.suggestion.response?.formatted_text,
+                        response_date = FormatDate(jsonObject.suggestion.response?.created_at),
                         total_comments = jsonObject.suggestion.comments_count,
                         most_recent_comments = await getCommentsOfItem(jsonObject.suggestion.topic.forum.id, id, accountName, apikey)
                     };
@@ -100,7 +100,9 @@ namespace UViz_Api.Controllers
 
         private static string FormatDate(string dateString)
         {
-            return DateTime.ParseExact(dateString, "yyyy/MM/dd HH:mm:ss +0000", CultureInfo.InvariantCulture).ToString("MMM dd, yyyy");
+            return !string.IsNullOrWhiteSpace(dateString) 
+                ? DateTime.ParseExact(dateString, "yyyy/MM/dd HH:mm:ss +0000", CultureInfo.InvariantCulture).ToString("MMM dd, yyyy")
+                : "";
         }
 
     }
