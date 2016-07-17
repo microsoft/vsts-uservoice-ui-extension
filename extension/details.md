@@ -2,7 +2,7 @@
 
 As a product owner you want to add the features to your product that are most valuable to your customers. There are multiple channels to get feedback from your customers and one of them that scales to thousands of users is [User Voice](http://www.uservoice.com). The Microsoft Visual Studio Cloud Services organization is responsible for Visual Studio Team Services, and uses User Voice intensily as described in the blog post [How we use User Voice to make a better product](https://blogs.msdn.microsoft.com/visualstudioalm/2015/10/08/how-we-use-user-voice-to-make-a-better-product/).
 
- ![Customer Feedback group on work item form](https://github.com/Microsoft/vsts-uservoice-ui-extension/blob/master/readme.png)
+ ![Customer Feedback group on work item form](https://raw.githubusercontent.com/Microsoft/vsts-uservoice-ui-extension/master/readme.png)
 
 In our backlogs, we add links to our Feature work items to these user voice items so we are aware of the customer value during prioritization, and to remember that we need to close the User Voice suggestion once it is deployed. Going through the links of all work items doesn't work, and that is where this extension comes in. It reads the work item links and parses the url. If the url is a User Voice suggestion, it will retrieve the title, votes and the state from User Voice and shows that data on the front page of your work item.
 
