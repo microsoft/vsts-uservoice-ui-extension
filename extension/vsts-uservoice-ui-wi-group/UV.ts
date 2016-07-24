@@ -12,6 +12,7 @@ export class UserVoiceSuggestion {
         public id: number,
         public title: string,
         public description: string,
+        public description_html: string,
         public url: string,
         public votes: number,
         public status: {
@@ -19,6 +20,7 @@ export class UserVoiceSuggestion {
             hex_color: string;
         },
         public response: string,
+        public response_html: string,
         public response_date: string,
         public total_comments: number,
         public most_recent_comments: UserVoiceComment[]
@@ -31,6 +33,7 @@ export class UserVoiceComment {
     public constructor(
         public created_by: string,
         public created_at: string,
+        public text: string,
         public html: string
     ) { }
 
@@ -107,6 +110,7 @@ export class Services {
                     data.id, 
                     data.title, 
                     data.description,
+                    data.description_html,
                     data.url,
                     data.votes, 
                     {
@@ -114,6 +118,7 @@ export class Services {
                         hex_color: data.status.hex_color
                     },
                     data.response,
+                    data.response_html,
                     data.response_date,
                     data.total_comments,
                     data.most_recent_comments)

@@ -95,35 +95,20 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                         $("#items table").append(
                             $(`<tr class="suggestion"/>`).html(
                                 `<td class="votes-status">
-                                    <div class="votes">${formatNumber(UVSuggestion.votes)}</div>
-                                    <div class="status" style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}">${UVSuggestion.status.name || "no state"}</div>
-                                    <div class="status-response tooltip">
-                                        <span class="status-response-date">${UVSuggestion.response_date}</span>
-                                        <span>${UVSuggestion.response}</span>
+                                    <div class="votes">
+                                        ${formatNumber(UVSuggestion.votes)}
+                                    </div>
+                                    <div 
+                                            class="status" 
+                                            style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}" 
+                                            ${UVSuggestion.response ? `title="${UVSuggestion.response_date}&#013;-----------------&#013;&#013;${UVSuggestion.response}"` : ""}>
+                                        ${UVSuggestion.status.name || "no state"}
                                     </div>
                                 </td>
                                 <td class="title-cell">
-                                    <a class="title" target="_blank" href="${UVSuggestion.url}">${UVSuggestion.title}</a>
-                                    <div class="suggestion-description tooltip">
-                                        <span>${UVSuggestion.description}</span>
-                                    </div>
-                                    ${UVSuggestion.total_comments === 0
-                                        ? "" 
-                                        : ` <div class="comments">
-                                                <span class="bowtie-icon bowtie-comment-discussion"></span>
-                                                <div class="commentcount">
-                                                    <span>${UVSuggestion.total_comments}</span>
-                                                    ${UVSuggestion.most_recent_comments && UVSuggestion.most_recent_comments.length > 0 
-                                                        ? `(<span class="most-recent-comment">${UVSuggestion.most_recent_comments[0].created_at}</span>)
-                                                </div>
-                                                <div id="comments_${UVSuggestion.id}" class="comments-tooltip tooltip">
-                                                    Newest comment by <span class="comment-created-by">${UVSuggestion.most_recent_comments[0].created_by}</span> <span>(${UVSuggestion.most_recent_comments[0].created_at})</span>
-                                                    <span>${UVSuggestion.most_recent_comments[0].html}</span>
-                                                </div>
-                                                    ` 
-                                                    : ""}
-                                            </div>`
-                                    }
+                                    <a class="title" target="_blank" href="${UVSuggestion.url}" title="${UVSuggestion.description} ${renderComments(UVSuggestion)}">
+                                        ${UVSuggestion.title}
+                                    </a>
                                 </td>`
                             )
                         );
@@ -158,6 +143,22 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                     
                 });
         });
+    }
+
+    function renderComments(UVSuggestion: UV.UserVoiceSuggestion): string {
+        if (UVSuggestion.total_comments === 0) {
+            return "";
+        } else {
+            var ret: string = `&#013;&#013;${UVSuggestion.total_comments} comments`;
+            
+            for (var i = 0; i < UVSuggestion.most_recent_comments.length; i++ ){ 
+                ret += `&#013;&#013;${UVSuggestion.most_recent_comments[i].created_by}` +
+                    ` (${UVSuggestion.most_recent_comments[i].created_at})` +
+                    `: ${UVSuggestion.most_recent_comments[i].text}`
+            }
+
+            return ret;
+        }
     }
     
     function formatNumber(value: number): string {
