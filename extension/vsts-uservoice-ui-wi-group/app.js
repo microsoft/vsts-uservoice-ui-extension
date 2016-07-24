@@ -54,13 +54,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 linkedUVSuggestions = linkedUVSuggestions.sort(function (a, b) { return b.votes - a.votes; });
                 $("#items").empty().append("<table/>");
                 $.each(linkedUVSuggestions.slice(0, 2), function (idx, UVSuggestion) {
-                    $("#items table").append($("<tr class=\"suggestion\"/>").html("<td class=\"votes-status\">\n                                    <div class=\"votes\">" + formatNumber(UVSuggestion.votes) + "</div>\n                                    <div class=\"status\" style=\"background-color: " + (UVSuggestion.status.hex_color || "rgb(207, 215, 230)") + "\">" + (UVSuggestion.status.name || "no state") + "</div>\n                                    " + (UVSuggestion.response
-                        ? "<div class=\"status-response tooltip\">\n                                                <span class=\"status-response-date\">" + UVSuggestion.response_date + "</span>\n                                                <span>" + UVSuggestion.response + "</span>\n                                            </div>"
-                        : "") + "\n                                </td>\n                                <td class=\"title-cell\">\n                                    <a class=\"title\" target=\"_blank\" href=\"" + UVSuggestion.url + "\">" + UVSuggestion.title + "</a>\n                                    <div class=\"suggestion-description tooltip\">\n                                        <span>" + UVSuggestion.description + "</span>\n                                    </div>\n                                    " + (UVSuggestion.total_comments === 0
-                        ? ""
-                        : " <div class=\"comments\">\n                                                <span class=\"bowtie-icon bowtie-comment-discussion\"></span>\n                                                <div class=\"commentcount\">\n                                                    <span>" + UVSuggestion.total_comments + "</span>\n                                                    " + (UVSuggestion.most_recent_comments && UVSuggestion.most_recent_comments.length > 0
-                            ? "(<span class=\"most-recent-comment\">" + UVSuggestion.most_recent_comments[0].created_at + "</span>)\n                                                            </div>\n                                                            <div id=\"comments_" + UVSuggestion.id + "\" class=\"comments-tooltip tooltip\">\n                                                                Newest comment by <span class=\"comment-created-by\">" + UVSuggestion.most_recent_comments[0].created_by + "</span> <span>(" + UVSuggestion.most_recent_comments[0].created_at + ")</span>\n                                                                <span>" + UVSuggestion.most_recent_comments[0].html + "</span>\n                                                            </div>\n                                                                "
-                            : "") + "\n                                            </div>") + "\n                                </td>"));
+                    $("#items table").append($("<tr class=\"suggestion\"/>").html("<td class=\"votes-status\">\n                                    <div class=\"votes\">\n                                        " + formatNumber(UVSuggestion.votes) + "\n                                    </div>\n                                    <div \n                                            class=\"status\" \n                                            style=\"background-color: " + (UVSuggestion.status.hex_color || "rgb(207, 215, 230)") + "\" \n                                            " + (UVSuggestion.response ? "title=\"" + UVSuggestion.response_date + "&#013;-----------------&#013;&#013;" + UVSuggestion.response + "\"" : "") + ">\n                                        " + (UVSuggestion.status.name || "no state") + "\n                                    </div>\n                                </td>\n                                <td class=\"title-cell\">\n                                    <a class=\"title\" target=\"_blank\" href=\"" + UVSuggestion.url + "\" title=\"" + UVSuggestion.description + " " + renderComments(UVSuggestion) + "\">\n                                        " + UVSuggestion.title + "\n                                    </a>\n                                </td>"));
                 });
                 if (linkedUVSuggestions.length === 0) {
                     var settings = new Settings.Settings();
@@ -77,6 +71,20 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 $("#items").append($("<div/>").html(reason ? reason.toString() : "Unknown error"));
             });
         });
+    }
+    function renderComments(UVSuggestion) {
+        if (UVSuggestion.total_comments === 0) {
+            return "";
+        }
+        else {
+            var ret = "&#013;&#013;" + UVSuggestion.total_comments + " comments";
+            for (var i = 0; i < UVSuggestion.most_recent_comments.length; i++) {
+                ret += ("&#013;&#013;" + UVSuggestion.most_recent_comments[i].created_by) +
+                    (" (" + UVSuggestion.most_recent_comments[i].created_at + ")") +
+                    (": " + UVSuggestion.most_recent_comments[i].text);
+            }
+            return ret;
+        }
     }
     function formatNumber(value) {
         var stringValue = value.toFixed(0);

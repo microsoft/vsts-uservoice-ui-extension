@@ -31,7 +31,8 @@ namespace UViz_Api.Controllers
                     {
                         id = id,
                         title = jsonObject.suggestion.title,
-                        description = jsonObject.suggestion.formatted_text,
+                        description = jsonObject.suggestion.text,
+                        description_html = jsonObject.suggestion.formatted_text,
                         url = jsonObject.suggestion.url,
                         votes = jsonObject.suggestion.vote_count,
                         status = new Status()
@@ -39,7 +40,8 @@ namespace UViz_Api.Controllers
                             name = jsonObject.suggestion.status?.name,
                             hex_color = jsonObject.suggestion.status?.hex_color
                         },
-                        response = jsonObject.suggestion.response?.formatted_text,
+                        response = jsonObject.suggestion.response?.text,
+                        response_html = jsonObject.suggestion.response?.formatted_text,
                         response_date = FormatDate(jsonObject.suggestion.response?.created_at),
                         total_comments = jsonObject.suggestion.comments_count,
                         most_recent_comments = await getCommentsOfItem(jsonObject.suggestion.topic.forum.id, id, accountName, apikey)
@@ -82,6 +84,7 @@ namespace UViz_Api.Controllers
                     return from c in jsonObject.comments
                            select new Comment()
                            {
+                               text = c.text,
                                html = c.formatted_text,
                                created_at = FormatDate(c.created_at),
                                created_by = c.creator.name

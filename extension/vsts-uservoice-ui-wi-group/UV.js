@@ -1,14 +1,16 @@
 define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], function (require, exports, Q, Settings) {
     "use strict";
     var UserVoiceSuggestion = (function () {
-        function UserVoiceSuggestion(id, title, description, url, votes, status, response, response_date, total_comments, most_recent_comments) {
+        function UserVoiceSuggestion(id, title, description, description_html, url, votes, status, response, response_html, response_date, total_comments, most_recent_comments) {
             this.id = id;
             this.title = title;
             this.description = description;
+            this.description_html = description_html;
             this.url = url;
             this.votes = votes;
             this.status = status;
             this.response = response;
+            this.response_html = response_html;
             this.response_date = response_date;
             this.total_comments = total_comments;
             this.most_recent_comments = most_recent_comments;
@@ -17,9 +19,10 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
     }());
     exports.UserVoiceSuggestion = UserVoiceSuggestion;
     var UserVoiceComment = (function () {
-        function UserVoiceComment(created_by, created_at, html) {
+        function UserVoiceComment(created_by, created_at, text, html) {
             this.created_by = created_by;
             this.created_at = created_at;
+            this.text = text;
             this.html = html;
         }
         return UserVoiceComment;
@@ -74,10 +77,10 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                 url: "../api/Suggestion/" + id + "?accountName=" + accountName + "&apikey=" + apiKey
             }).done(function (data) {
                 if (data.id) {
-                    defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.description, data.url, data.votes, {
+                    defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.description, data.description_html, data.url, data.votes, {
                         name: data.status.name,
                         hex_color: data.status.hex_color
-                    }, data.response, data.response_date, data.total_comments, data.most_recent_comments));
+                    }, data.response, data.response_html, data.response_date, data.total_comments, data.most_recent_comments));
                 }
                 else {
                     var settings = new Settings.Settings;

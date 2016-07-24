@@ -10,6 +10,7 @@ namespace UViz_Api.Models
         public string created_by { get; set; }
         public string created_at { get; set; }
         public string html { get; set; }
+        public string text { get; set; }
 
     }
 }

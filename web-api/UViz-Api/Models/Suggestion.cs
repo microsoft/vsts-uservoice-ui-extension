@@ -15,9 +15,14 @@ namespace UViz_Api.Models
         public string title { get; set; }
 
         /// <summary>
-        /// The html-formatted description of the suggestion
+        /// The unformatted (plain text) description of the suggestion
         /// </summary>
         public string description { get; set; }
+
+        /// <summary>
+        /// The html-formatted description of the suggestion
+        /// </summary>
+        public string description_html { get; set; }
 
         /// <summary>
         /// The public facing url to the suggestion
@@ -40,9 +45,14 @@ namespace UViz_Api.Models
         public IEnumerable<Comment> most_recent_comments { get; set; }
 
         /// <summary>
-        /// The last html-formatted response that goes with the status
+        /// The unformatted (plain text) response that goes with the status
         /// </summary>
         public string response { get; set; }
+
+        /// <summary>
+        /// The last html-formatted response that goes with the status
+        /// </summary>
+        public string response_html { get; set; }
 
         /// <summary>
         /// The date when the status was changed last
