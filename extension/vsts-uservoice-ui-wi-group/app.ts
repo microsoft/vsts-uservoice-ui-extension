@@ -106,9 +106,17 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
                                     </div>
                                 </td>
                                 <td class="title-cell">
-                                    <a class="title" target="_blank" href="${UVSuggestion.url}" title="${UVSuggestion.description} ${renderComments(UVSuggestion)}">
+                                    <a class="title" target="_blank" href="${UVSuggestion.url}" title="${UVSuggestion.description}">
                                         ${UVSuggestion.title}
                                     </a>
+                                    ${UVSuggestion.total_comments === 0
+                                        ? "" 
+                                        : ` <div class="comments" title="${renderComments(UVSuggestion)}">
+                                                <span class="bowtie-icon bowtie-comment-discussion"></span>
+                                                <div class="commentcount">
+                                                    <span>${UVSuggestion.total_comments}</span>
+                                            </div>`
+                                    }
                                 </td>`
                             )
                         );
@@ -149,10 +157,13 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
         if (UVSuggestion.total_comments === 0) {
             return "";
         } else {
-            var ret: string = `&#013;&#013;${UVSuggestion.total_comments} comments`;
+            var ret: string = ``;
             
-            for (var i = 0; i < UVSuggestion.most_recent_comments.length; i++ ){ 
-                ret += `&#013;&#013;${UVSuggestion.most_recent_comments[i].created_by}` +
+            for (var i = 0; i < UVSuggestion.most_recent_comments.length; i++ ){
+                if (i > 0) {
+                    ret += "&#013;&#013";
+                } 
+                ret += `${UVSuggestion.most_recent_comments[i].created_by}` +
                     ` (${UVSuggestion.most_recent_comments[i].created_at})` +
                     `: ${UVSuggestion.most_recent_comments[i].text}`
             }

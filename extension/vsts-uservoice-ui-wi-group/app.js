@@ -54,7 +54,9 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 linkedUVSuggestions = linkedUVSuggestions.sort(function (a, b) { return b.votes - a.votes; });
                 $("#items").empty().append("<table/>");
                 $.each(linkedUVSuggestions.slice(0, 2), function (idx, UVSuggestion) {
-                    $("#items table").append($("<tr class=\"suggestion\"/>").html("<td class=\"votes-status\">\n                                    <div class=\"votes\">\n                                        " + formatNumber(UVSuggestion.votes) + "\n                                    </div>\n                                    <div \n                                            class=\"status\" \n                                            style=\"background-color: " + (UVSuggestion.status.hex_color || "rgb(207, 215, 230)") + "\" \n                                            " + (UVSuggestion.response ? "title=\"" + UVSuggestion.response_date + "&#013;-----------------&#013;&#013;" + UVSuggestion.response + "\"" : "") + ">\n                                        " + (UVSuggestion.status.name || "no state") + "\n                                    </div>\n                                </td>\n                                <td class=\"title-cell\">\n                                    <a class=\"title\" target=\"_blank\" href=\"" + UVSuggestion.url + "\" title=\"" + UVSuggestion.description + " " + renderComments(UVSuggestion) + "\">\n                                        " + UVSuggestion.title + "\n                                    </a>\n                                </td>"));
+                    $("#items table").append($("<tr class=\"suggestion\"/>").html("<td class=\"votes-status\">\n                                    <div class=\"votes\">\n                                        " + formatNumber(UVSuggestion.votes) + "\n                                    </div>\n                                    <div \n                                            class=\"status\" \n                                            style=\"background-color: " + (UVSuggestion.status.hex_color || "rgb(207, 215, 230)") + "\" \n                                            " + (UVSuggestion.response ? "title=\"" + UVSuggestion.response_date + "&#013;-----------------&#013;&#013;" + UVSuggestion.response + "\"" : "") + ">\n                                        " + (UVSuggestion.status.name || "no state") + "\n                                    </div>\n                                </td>\n                                <td class=\"title-cell\">\n                                    <a class=\"title\" target=\"_blank\" href=\"" + UVSuggestion.url + "\" title=\"" + UVSuggestion.description + "\">\n                                        " + UVSuggestion.title + "\n                                    </a>\n                                    " + (UVSuggestion.total_comments === 0
+                        ? ""
+                        : " <div class=\"comments\" title=\"" + renderComments(UVSuggestion) + "\">\n                                                <span class=\"bowtie-icon bowtie-comment-discussion\"></span>\n                                                <div class=\"commentcount\">\n                                                    <span>" + UVSuggestion.total_comments + "</span>\n                                            </div>") + "\n                                </td>"));
                 });
                 if (linkedUVSuggestions.length === 0) {
                     var settings = new Settings.Settings();
@@ -77,9 +79,12 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
             return "";
         }
         else {
-            var ret = "&#013;&#013;" + UVSuggestion.total_comments + " comments";
+            var ret = "";
             for (var i = 0; i < UVSuggestion.most_recent_comments.length; i++) {
-                ret += ("&#013;&#013;" + UVSuggestion.most_recent_comments[i].created_by) +
+                if (i > 0) {
+                    ret += "&#013;&#013";
+                }
+                ret += ("" + UVSuggestion.most_recent_comments[i].created_by) +
                     (" (" + UVSuggestion.most_recent_comments[i].created_at + ")") +
                     (": " + UVSuggestion.most_recent_comments[i].text);
             }
