@@ -33,7 +33,6 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
             this.workItemFormService = workItemFormService;
         }
         Services.prototype.linkedUVSuggestions = function () {
-            var _this = this;
             var self = this;
             var defer = Q.defer();
             var settings = new Settings.Settings();
@@ -44,20 +43,13 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                 .spread(function (settings, relations) {
                 var userVoiceItems = relations
                     .map(function (relation) {
-                    var pattern = "/forums/[0-9]+.*/suggestions/([0-9]+)";
-                    var matches = relation.url.match(pattern);
-                    if (matches && matches.length > 1) {
-                        return { id: matches[1] };
-                    }
-                    else {
-                        return { id: null };
-                    }
+                    return Services.extractIdFromUrl(relation.url);
                 })
                     .filter(function (item) {
                     return item.id !== null;
                 })
                     .map(function (item) {
-                    return _this._getUserVoiceInfo(settings.accountName, settings.apiKey, item.id);
+                    return self._getUserVoiceInfo(settings.accountName, settings.apiKey, item.id);
                 });
                 Q.all(userVoiceItems).then(function (suggestions) {
                     defer.resolve(suggestions);
@@ -70,13 +62,42 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
             });
             return defer.promise;
         };
+        Services.extractIdFromUrl = function (url) {
+            var pattern = "/forums/[0-9]+.*/suggestions/([0-9]+)|/admin/v[23]/suggestions/([0-9]+)";
+            var matches = url.match(pattern);
+            if (matches && matches.length > 2) {
+                return { id: matches[1] || matches[2] };
+            }
+            else {
+                return { id: null };
+            }
+        };
+        Services.prototype.idExists = function (id) {
+            var self = this;
+            var defer = Q.defer();
+            var settings = new Settings.Settings();
+            var q = Q.all([
+                settings.getSettings(true)
+            ])
+                .spread(function (settings) {
+                self._getUserVoiceInfo(settings.accountName, settings.apiKey, id)
+                    .done(function (suggestion) { defer.resolve(suggestion); }, function () { defer.resolve(null); });
+            })
+                .fail(function (reason) {
+                defer.reject(reason);
+            });
+            return defer.promise;
+        };
         Services.prototype._getUserVoiceInfo = function (accountName, apiKey, id) {
             var defer = Q.defer();
             $.ajax({
                 type: "GET",
                 url: "../api/Suggestion/" + id + "?accountName=" + accountName + "&apikey=" + apiKey
             }).done(function (data) {
-                if (data.id) {
+                if (!data.url) {
+                    defer.reject("item is not found");
+                }
+                else if (data.id) {
                     defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.description, data.description_html, data.url, data.votes, {
                         name: data.status.name,
                         hex_color: data.status.hex_color
@@ -87,6 +108,8 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                     var reason = "Unable to retrieve the data from User Voice (reason: " + data.title + "). Please make sure the <a target=\"_blank\" href=\"" + settings.urlToConfigureSettings() + "\">api key is configured</a> correctly";
                     defer.reject(reason);
                 }
+            }).fail(function (error) {
+                defer.reject(error.responseText);
             });
             return defer.promise;
         };

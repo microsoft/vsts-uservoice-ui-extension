@@ -25,7 +25,18 @@
         });
     </script>
 
-    <div id="items"></div>
+    <div id="container">
 
+        <div id="add-item" style="margin-bottom:10px">
+            <input 
+                id="add-item-id" 
+                placeholder="Enter ID or URL to add suggestion (commit with Enter)" 
+                style="width:100%; max-width: 400px; border: rgb(238, 238, 238) solid 1px;" />
+            <p id="invalid-item-id" style="color:red; display:none" />
+        </div>
+
+        <div id="message"></div>
+        <div id="items" style="min-height: 100px;"></div>
+    </div>
 </body>
 </html>

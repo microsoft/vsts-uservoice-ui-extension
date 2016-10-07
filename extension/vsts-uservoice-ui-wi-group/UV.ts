@@ -41,7 +41,7 @@ export class UserVoiceComment {
 
 export class Services {
 
-    constructor(public workItemFormService: WitServices.IWorkItemFormService) {
+    constructor(public workItemFormService?: WitServices.IWorkItemFormService) {
     }
     
     public linkedUVSuggestions(): Q.Promise<UserVoiceSuggestion[]> {
@@ -60,13 +60,7 @@ export class Services {
             var userVoiceItems = relations
                 // extract the id from the url. when the url is not a valid uservoice url, then the id will be null  
                 .map((relation: WitContracts.WorkItemRelation): {id: string} => {
-                    var pattern = `\/forums/[0-9]+.*/suggestions/([0-9]+)`;
-                    var matches = relation.url.match(pattern);
-                    if ( matches && matches.length > 1 ) {
-                        return {id: matches[1]};
-                    } else {
-                        return {id: null};
-                    }
+                    return Services.extractIdFromUrl(relation.url);
                 })
                 // exclude invalid uservoice urls 
                 .filter((item: {id: string}) => {
@@ -74,7 +68,7 @@ export class Services {
                 })
                 // retrieve the data from the user voice site (which is a promise) 
                 .map((item: {id: string}) => {
-                    return this._getUserVoiceInfo(settings.accountName, settings.apiKey, item.id);
+                    return self._getUserVoiceInfo(settings.accountName, settings.apiKey, item.id);
                 });
 
             // wait until the data for all user voice items is retrieved                
@@ -93,6 +87,52 @@ export class Services {
         
         return defer.promise;
     }
+
+    /** 
+     * Parses the url and returns the User Voice suggestion ID from 
+     * the url. Will return null when the url is not a valid User Voice
+     * url. 
+     */
+    public static extractIdFromUrl(url: string): {id: string} {
+        var pattern = `\/forums/[0-9]+.*/suggestions/([0-9]+)|/admin/v[23]/suggestions/([0-9]+)`;
+        var matches = url.match(pattern);
+        if ( matches && matches.length > 2 ) {
+            // matches[1] is for the public facing url
+            // matches[2] is for the admin url
+            return {id: matches[1]||matches[2]};
+        } else {
+            return {id: null};
+        }
+    }
+
+    /**
+     * Validates if the given ID is a valid User Voice item in the forum. It returns the 
+     * UserVoiceSuggestion object when found, else null.
+     */
+    public idExists(id: string): Q.Promise<UserVoiceSuggestion> {
+        var self = this;
+        var defer = Q.defer<UserVoiceSuggestion>();
+        var settings = new Settings.Settings();
+
+        // load the settings and get the work item relations
+        var q = Q.all([
+            settings.getSettings(true) 
+        ])
+        // when both are done then
+        .spread((settings: Settings.UVizSettings) => {
+             self._getUserVoiceInfo(settings.accountName, settings.apiKey, id)
+                .done(
+                    (suggestion: UserVoiceSuggestion) => {defer.resolve(suggestion)}, // the _getUserVoiceInfo will resolve the promise when the id is found, then return suggestion 
+                    () => {defer.resolve(null)}); // the _getUserVoiceInfo will reject the promise when the id is NOT found, then return null
+        })
+        .fail((reason: any): void => {
+            // the work item relations could not be retrieved
+            defer.reject(reason);
+        });
+        
+        return defer.promise;
+        
+    }
     
     private _getUserVoiceInfo(accountName: string, apiKey: string, id: string): Q.Promise<UserVoiceSuggestion> {
         var defer = Q.defer<UserVoiceSuggestion>();
@@ -104,7 +144,10 @@ export class Services {
             url: `../api/Suggestion/${id}?accountName=${accountName}&apikey=${apiKey}`
         }).done((data: any) => {
             
-            if (data.id) {            
+            if (!data.url) {
+                // the item is not found
+                defer.reject("item is not found");
+            } else if (data.id) {            
                 // when the id is set, the call was successful and return the data
                 defer.resolve(new UserVoiceSuggestion(
                     data.id, 
@@ -129,6 +172,8 @@ export class Services {
                 var reason = `Unable to retrieve the data from User Voice (reason: ${data.title}). Please make sure the <a target="_blank" href="${settings.urlToConfigureSettings()}">api key is configured</a> correctly`;
                 defer.reject(reason);
             }
+        }).fail((error: any) => {
+            defer.reject(error.responseText);
         });
         
         return defer.promise;

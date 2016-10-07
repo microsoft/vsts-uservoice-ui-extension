@@ -1,8 +1,11 @@
 ﻿/// <reference path='../typings/tsd.d.ts' />
 
 import WitServices = require("TFS/WorkItemTracking/Services");
+import WitContracts = require("TFS/WorkItemTracking/Contracts");
 import UV = require("vsts-uservoice-ui-wi-group/UV");
 import Settings = require("vsts-uservoice-ui-settings-hub/settings");
+import Controls = require("VSS/Controls");
+import StatusIndicator = require("VSS/Controls/StatusIndicator");
 
     // Register a listener for the work item group contribution.
     VSS.register("vsts-uservoice-ui-wi-group", function () {
@@ -10,6 +13,22 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
             // Called when a new work item is being loaded in the UI
             onLoaded: function (args) {
                 render();
+
+                // Register the event to add a link to the entered the User Voice item ID
+                // when hitting {Enter}
+                $("#add-item-id").keypress((e) => {
+                    
+                    // when it is the Enter key
+                    var key = e.which;
+                    if (key === 13) {
+
+                        // read the value from the input control
+                        var suggestionIdOrUrl = $("#add-item-id").val();
+
+                        // verify the input and add the link
+                        addUserVoiceSuggestion(suggestionIdOrUrl)
+                    }
+                })
             },
 
             // Called after the work item has been saved
@@ -38,6 +57,99 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
             }
         }
     });
+
+    /**
+     * Adds a link to the work item based on the ID of the User Voice item entered through the add-item input 
+     */
+    function addUserVoiceSuggestion(idOrUrl: string): void {
+        var waitcontrol = startWaitControl();
+
+        // function to show something went wrong, and return false
+        var returnInvalidId = (reason: string, clearValue: boolean) => {
+            
+            // show the error message
+            $("#invalid-item-id").text(reason).show();
+            
+            // hide the message after 2 seconds
+            setTimeout(() =>  {
+                $("#invalid-item-id").hide();
+            }, 2000);
+
+            // when the link was added succesfully, clear the input control
+            if (clearValue) {
+                $("#add-item-id").val("");
+            }
+
+            endWaitControl(waitcontrol);
+        }
+
+        // function to add the UV suggestion as a link
+        var addLink = (suggestion: UV.UserVoiceSuggestion) => {
+            WitServices.WorkItemFormService.getService().then((wi: WitServices.IWorkItemFormService) => {
+                
+                // get the relations of the work item 
+                wi.getWorkItemRelations().then((relations: WitContracts.WorkItemRelation[]) => {
+                    
+                    // don't add the link if it already exists
+                    var linkExists = relations.some((relation: WitContracts.WorkItemRelation) => {
+                        return relation.url === suggestion.url;
+                    });
+                    
+                    if (!linkExists) {
+
+                        // Add a hyperlink work item link
+                        wi.addWorkItemRelations([
+                            {
+                                attributes: {
+                                    key: suggestion.title // the comment of the work item link
+                                },
+                                rel: "Hyperlink", // valid values are: 'Hyperlink', 'ArtifactLink' (e.g. git commit), any valid linktype name (e.g. 'Child', 'Parent')
+                                title: undefined, // the title is ignored for work item links 
+                                url: suggestion.url // the url for the Hyperlink, git commit, or work item
+                            }]);
+
+                        // the link has been added succesfully, hide any error message and clear the input control   
+                        $("#invalid-item-id").hide();
+                        $("#add-item-id").val("");
+
+                        endWaitControl(waitcontrol);
+                    } else {
+
+                        returnInvalidId("User Voice suggestion is already linked", true);
+
+                    }
+                    
+                });
+            });
+        }
+
+        // when the idOrUrl is a valid number (parseInt), then use it. Else try to 
+        // extract the id from the url.
+        var id = parseInt(idOrUrl) || UV.Services.extractIdFromUrl(idOrUrl).id;
+
+        if (!id) {
+            returnInvalidId("ID is not a number or a valid URL", false);
+        } else {
+            var UVServices = new UV.Services();
+            UVServices.idExists(id.toString()).done(
+                (suggestion: UV.UserVoiceSuggestion) => {
+                    if (suggestion) {
+                        // when the id is a valid User Voice ID, then hide the error 
+                        // text, add the link and indicate it was succesful to clear 
+                        // the value from the input
+                        addLink(suggestion);
+                    } else {
+                        // Not a valid User Voice ID
+                        returnInvalidId("Not a valid User Voice item ID", false);
+                    } 
+                },
+                (reason: string) => {
+                    // Something went wrong
+                    returnInvalidId(reason ? reason.toString() : "Unknown error", false);
+                } 
+            ); 
+        }
+    }
 
     /**
      * Adds the tag as specified in the settings to the current work item. If no tag is configured, nothing happens. 
@@ -76,7 +188,11 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
         })        
     }
 
+
+
     function render() {
+        var waitcontrol = startWaitControl();
+
         WitServices.WorkItemFormService.getService().then(service => {
 
             var UVServices = new UV.Services(service);
@@ -84,72 +200,76 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
             UVServices.linkedUVSuggestions()
                 .then(linkedUVSuggestions => {
                     
-                    // sort the suggestion descending by its votes
-                    linkedUVSuggestions = linkedUVSuggestions.sort((a: UV.UserVoiceSuggestion, b: UV.UserVoiceSuggestion): number => { return b.votes - a.votes})
-                    
-                    // remove all existing items and start a table
-                    $("#items").empty().append("<table/>");
-
-                    // show the 2 user voice items with the most votes
-                    $.each(linkedUVSuggestions.slice(0, 2), (idx: number, UVSuggestion: UV.UserVoiceSuggestion) => {
-                        $("#items table").append(
-                            $(`<tr class="suggestion"/>`).html(
-                                `<td class="votes-status">
-                                    <div class="votes">
-                                        ${formatNumber(UVSuggestion.votes)}
-                                    </div>
-                                    <div 
-                                            class="status" 
-                                            style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}" 
-                                            ${UVSuggestion.response ? `title="${UVSuggestion.response_date}&#013;-----------------&#013;&#013;${UVSuggestion.response}"` : ""}>
-                                        ${UVSuggestion.status.name || "no state"}
-                                    </div>
-                                </td>
-                                <td class="title-cell">
-                                    <a class="title" target="_blank" href="${UVSuggestion.url}" title="${UVSuggestion.description}">
-                                        ${UVSuggestion.title}
-                                    </a>
-                                    ${UVSuggestion.total_comments === 0
-                                        ? "" 
-                                        : ` <div class="comments" title="${renderComments(UVSuggestion)}">
-                                                <span class="bowtie-icon bowtie-comment-discussion"></span>
-                                                <div class="commentcount">
-                                                    <span>${UVSuggestion.total_comments}</span>
-                                            </div>`
-                                    }
-                                </td>`
-                            )
-                        );
-                    });
-
                     // when there are no items linked provide a help text
                     if (linkedUVSuggestions.length === 0) {
                         var settings = new Settings.Settings();
                         settings.getSettings(true).then((settings: Settings.UVizSettings) => {
-                            $("#items").empty().append($(`
+                            $("#items").empty();
+                            $("#message").empty().append($(`
                             <span class="no-linked-suggestions" />`).html(`
                                 <p>
                                     No suggestions linked to this work item. Find some in <a target="_blank" href="http://${settings.accountName}.uservoice.com">your User Voice forum</a>. 
-                                </p><p>
-                                    Once you found a suggestion, add the User Voice URL as an "Hyperlink" to this work item. 
-                                </p><p>
-                                    See also this <a href="addlink.gif" target="_blank">instruction video</a>.
                                 </p>`));
                         });
-                    }
-                    
-                    // when there are more than 2 items, add a text to indicate there are more
-                    if (linkedUVSuggestions.length > 2) {
-                        $("#items").append($("<div />").html(`${linkedUVSuggestions.length - 2} more suggestion${linkedUVSuggestions.length === 3 ? "" : "s"} linked`))
+                    } else {
+
+                        $("#message").empty();
+                        // start a table
+                        $("#items").empty().append("<table/>");
+                   
+                        // sort the suggestion descending by its votes
+                        linkedUVSuggestions = linkedUVSuggestions.sort((a: UV.UserVoiceSuggestion, b: UV.UserVoiceSuggestion): number => { return b.votes - a.votes})
+                        
+                        // show all user voice items sorted by most votes
+                        $.each(linkedUVSuggestions, (idx: number, UVSuggestion: UV.UserVoiceSuggestion) => {
+                            $("#items table").append(
+                                $(`<tr class="suggestion"/>`).html(
+                                    `<td class="votes-status">
+                                        <div class="votes">
+                                            ${formatNumber(UVSuggestion.votes)}
+                                        </div>
+                                        <div 
+                                                class="status" 
+                                                style="background-color: ${UVSuggestion.status.hex_color || "rgb(207, 215, 230)"}" 
+                                                ${UVSuggestion.response ? `title="${UVSuggestion.response_date}&#013;-----------------&#013;&#013;${UVSuggestion.response}"` : ""}>
+                                            ${UVSuggestion.status.name || "no state"}
+                                        </div>
+                                    </td>
+                                    <td class="title-cell">
+                                        <a class="title" target="_blank" href="${UVSuggestion.url}" title="${UVSuggestion.description}">
+                                            ${UVSuggestion.title}
+                                        </a>
+                                        ${UVSuggestion.total_comments === 0
+                                            ? "" 
+                                            : ` <div class="comments" title="${renderComments(UVSuggestion)}">
+                                                    <span class="bowtie-icon bowtie-comment-discussion"></span>
+                                                    <div class="commentcount">
+                                                        <span>${UVSuggestion.total_comments}</span>
+                                                </div>`
+                                        }
+                                    </td>`
+                                )
+                            );
+                        });
+
+                        var newHeight = $("#add-item").height() + $("#message").height(); 
+                        $("#items table td").each((idx: number, elt: Element) => {
+                            newHeight += $(elt).height();
+                        });
+                        // resize the control to fit the contents
+                        VSS.resize(null, newHeight);
                     }
                 })
                 .fail((reason: any): void => {
 
-                    // remove all existing items
-                    $("#items").empty();
-                    $("#items").append($("<div/>").html(reason ? reason.toString() : "Unknown error"));
+                    // remove all existing items and show error
+                    $("#items").empty().append($("<div style='color:red'/>").html(reason ? reason.toString() : "Unknown error"));
                     
+                })
+                .finally(() => {
+                    endWaitControl(waitcontrol);
                 });
+                
         });
     }
 
@@ -180,3 +300,40 @@ import Settings = require("vsts-uservoice-ui-settings-hub/settings");
         }
         return stringValue;
     }    
+
+    /**
+     * Starts the wait control. When there is already a wait control running, null is returned
+     */
+    function startWaitControl(): StatusIndicator.WaitControl {
+        var isAlreadyRunning = $("#waitcontrol").attr("running") === "true";
+
+        if (isAlreadyRunning) {
+            return null;
+        } else {
+            // create and start the wait control
+            var waitControlOptions: StatusIndicator.IWaitControlOptions = {
+                target: $("#container"),
+                message: "Reaching out to UserVoice.com...",
+                backgroundColor: "transparent"
+            };
+            var waitcontrol = Controls.create<StatusIndicator.WaitControl, StatusIndicator.IWaitControlOptions>(StatusIndicator.WaitControl, $("#container"), waitControlOptions);
+            waitcontrol.startWait();
+
+            // indicate the wait control is running
+            $("#waitcontrol").attr("running", "true")
+
+            return waitcontrol;
+        }
+    }
+
+    /**
+     * Ends the wait control.
+     */
+    function endWaitControl(waitcontrol: StatusIndicator.WaitControl) {
+        if (waitcontrol) {
+            waitcontrol.endWait();
+
+            // indicate the wait control is running
+            $("#waitcontrol").attr("running", "false");
+        }
+    }
