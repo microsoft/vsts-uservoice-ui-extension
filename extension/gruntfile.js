@@ -16,7 +16,7 @@
                 stderr: true
             },
             publish: {
-                command: "tfx extension publish --manifest-globs vss-extension.json --share-with ewaldhofman",
+                command: "tfx extension publish --manifest-globs vss-extension.json --share-with <your account-name>",
                 stdout: true,
                 stderr: true
             }
