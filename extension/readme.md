@@ -32,7 +32,7 @@ Three basic `grunt` tasks are defined:
 * `publish` - Publishes the extension to the marketplace using `tfx-cli`
 * `deploy` - Uploads the files to Azure using FTP (add your credentials to the Azure FTP site in the file .ftppass in the extension folder)
 
-Note: To avoid `tfx` prompting for your token when publishing, login in beforehand using `tfx login` and the service uri of ` https://app.market.visualstudio.com`.
+Note: To avoid `tfx` prompting for your token when publishing, login in beforehand using `tfx login` and the service uri of ` https://marketplace.visualstudio.com`.
 
 #### Including framework modules ####
 
