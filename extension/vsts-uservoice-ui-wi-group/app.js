@@ -8,7 +8,11 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                     var key = e.which;
                     if (key === 13) {
                         var suggestionIdOrUrl = $("#add-item-id").val();
+                        addingIds = true;
                         addUserVoiceSuggestion(suggestionIdOrUrl);
+                        addingIds = false;
+                        addTag();
+                        render();
                     }
                 });
             },
@@ -22,14 +26,14 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 render();
             },
             onFieldChanged: function (args) {
-                if (args.changedFields["System.LinkedFiles"] === "") {
+                if (!addingIds && args.changedFields["System.LinkedFiles"] === "") {
                     addTag();
                     render();
                 }
             }
         };
     });
-    function addUserVoiceSuggestion(idOrUrl) {
+    function addUserVoiceSuggestion(idOrUrls) {
         var waitcontrol = startWaitControl();
         var returnInvalidId = function (reason, clearValue) {
             $("#invalid-item-id").text(reason).show();
@@ -67,23 +71,25 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
                 });
             });
         };
-        var id = parseInt(idOrUrl) || UV.Services.extractIdFromUrl(idOrUrl).id;
-        if (!id) {
-            returnInvalidId("ID is not a number or a valid URL", false);
-        }
-        else {
-            var UVServices = new UV.Services();
-            UVServices.idExists(id.toString()).done(function (suggestion) {
-                if (suggestion) {
-                    addLink(suggestion);
-                }
-                else {
-                    returnInvalidId("Not a valid User Voice item ID", false);
-                }
-            }, function (reason) {
-                returnInvalidId(reason ? reason.toString() : "Unknown error", false);
-            });
-        }
+        $.each(idOrUrls.split(","), function (idx, idOrUrl) {
+            var id = parseInt(idOrUrl) || UV.Services.extractIdFromUrl(idOrUrl).id;
+            if (!id) {
+                returnInvalidId("ID is not a number or a valid URL", false);
+            }
+            else {
+                var UVServices = new UV.Services();
+                UVServices.idExists(id.toString()).done(function (suggestion) {
+                    if (suggestion) {
+                        addLink(suggestion);
+                    }
+                    else {
+                        returnInvalidId("Not a valid User Voice item ID", false);
+                    }
+                }, function (reason) {
+                    returnInvalidId(reason ? reason.toString() : "Unknown error", false);
+                });
+            }
+        });
     }
     function addTag() {
         var settings = new Settings.Settings();
@@ -109,6 +115,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "vsts-uservoice-u
             });
         });
     }
+    var addingIds = false;
     function render() {
         var waitcontrol = startWaitControl();
         WitServices.WorkItemFormService.getService().then(function (service) {

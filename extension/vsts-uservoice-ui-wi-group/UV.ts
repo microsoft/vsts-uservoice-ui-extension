@@ -146,7 +146,7 @@ export class Services {
             
             if (!data.url) {
                 // the item is not found
-                defer.reject("item is not found");
+                defer.reject(`item is not found for id ${id}`);
             } else if (data.id) {            
                 // when the id is set, the call was successful and return the data
                 defer.resolve(new UserVoiceSuggestion(

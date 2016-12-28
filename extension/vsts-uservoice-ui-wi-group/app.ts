@@ -25,8 +25,20 @@ import StatusIndicator = require("VSS/Controls/StatusIndicator");
                         // read the value from the input control
                         var suggestionIdOrUrl = $("#add-item-id").val();
 
+                        // set the flag to indicate the form should not render on every
+                        // link that is added. We will render the changes explicitly
+                        addingIds = true;
+
                         // verify the input and add the link
                         addUserVoiceSuggestion(suggestionIdOrUrl)
+
+                        // reset the flag so any link that is added to the work item will
+                        // result in a rerender of the control
+                        addingIds = false;
+
+                        // add the UserVoice tag and render the control to reflect the changes
+                        addTag();
+                        render();
                     }
                 })
             },
@@ -49,7 +61,7 @@ import StatusIndicator = require("VSS/Controls/StatusIndicator");
             // Called when a field is changed on the work item
             onFieldChanged: function (args) {
                 // When adding a link
-                if (args.changedFields["System.LinkedFiles"] === "") {
+                if (!addingIds && args.changedFields["System.LinkedFiles"] === "") {
                     // add the defined tag when one of the links is a user voice suggestion
                     addTag();
                     render();
@@ -61,7 +73,7 @@ import StatusIndicator = require("VSS/Controls/StatusIndicator");
     /**
      * Adds a link to the work item based on the ID of the User Voice item entered through the add-item input 
      */
-    function addUserVoiceSuggestion(idOrUrl: string): void {
+    function addUserVoiceSuggestion(idOrUrls: string): void {
         var waitcontrol = startWaitControl();
 
         // function to show something went wrong, and return false
@@ -125,30 +137,32 @@ import StatusIndicator = require("VSS/Controls/StatusIndicator");
 
         // when the idOrUrl is a valid number (parseInt), then use it. Else try to 
         // extract the id from the url.
-        var id = parseInt(idOrUrl) || UV.Services.extractIdFromUrl(idOrUrl).id;
+        $.each(idOrUrls.split(","), (idx:number, idOrUrl: string) => {
+            var id = parseInt(idOrUrl) || UV.Services.extractIdFromUrl(idOrUrl).id;
 
-        if (!id) {
-            returnInvalidId("ID is not a number or a valid URL", false);
-        } else {
-            var UVServices = new UV.Services();
-            UVServices.idExists(id.toString()).done(
-                (suggestion: UV.UserVoiceSuggestion) => {
-                    if (suggestion) {
-                        // when the id is a valid User Voice ID, then hide the error 
-                        // text, add the link and indicate it was succesful to clear 
-                        // the value from the input
-                        addLink(suggestion);
-                    } else {
-                        // Not a valid User Voice ID
-                        returnInvalidId("Not a valid User Voice item ID", false);
+            if (!id) {
+                returnInvalidId("ID is not a number or a valid URL", false);
+            } else {
+                var UVServices = new UV.Services();
+                UVServices.idExists(id.toString()).done(
+                    (suggestion: UV.UserVoiceSuggestion) => {
+                        if (suggestion) {
+                            // when the id is a valid User Voice ID, then hide the error 
+                            // text, add the link and indicate it was succesful to clear 
+                            // the value from the input
+                            addLink(suggestion);
+                        } else {
+                            // Not a valid User Voice ID
+                            returnInvalidId("Not a valid User Voice item ID", false);
+                        } 
+                    },
+                    (reason: string) => {
+                        // Something went wrong
+                        returnInvalidId(reason ? reason.toString() : "Unknown error", false);
                     } 
-                },
-                (reason: string) => {
-                    // Something went wrong
-                    returnInvalidId(reason ? reason.toString() : "Unknown error", false);
-                } 
-            ); 
-        }
+                ); 
+            }
+        });
     }
 
     /**
@@ -188,7 +202,7 @@ import StatusIndicator = require("VSS/Controls/StatusIndicator");
         })        
     }
 
-
+    var addingIds: boolean = false;
 
     function render() {
         var waitcontrol = startWaitControl();

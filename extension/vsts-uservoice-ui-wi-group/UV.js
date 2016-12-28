@@ -95,7 +95,7 @@ define(["require", "exports", "q", "vsts-uservoice-ui-settings-hub/settings"], f
                 url: "../api/Suggestion/" + id + "?accountName=" + accountName + "&apikey=" + apiKey
             }).done(function (data) {
                 if (!data.url) {
-                    defer.reject("item is not found");
+                    defer.reject("item is not found for id " + id);
                 }
                 else if (data.id) {
                     defer.resolve(new UserVoiceSuggestion(data.id, data.title, data.description, data.description_html, data.url, data.votes, {
